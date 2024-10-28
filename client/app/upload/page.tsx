@@ -26,7 +26,7 @@ export default function page() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/upload",
+        `${process.env.NEXT_PUBLIC_UPLOAD_IP}`,
         formData,
         {
           headers: {
