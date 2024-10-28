@@ -25,11 +25,15 @@ export default function page() {
     formData.append("file", file);
 
     try {
-      const response = await axios.post("localhost:8080/api/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        "http://localhost:8080/api/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       console.log("Video uploaded successfully:", response.data);
     } catch (error) {
       console.error("Error uploading video:", error);

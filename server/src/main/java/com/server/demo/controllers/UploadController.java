@@ -44,7 +44,7 @@ public class UploadController {
             // Save video metadata to database
             VideoEntity video = new VideoEntity();
             video.setTitle(file.getOriginalFilename());
-            video.setFilePath(filePath.toString());
+            video.setFilePath(uploadDir + fileName);
             videoRepository.save(video);
 
             return ResponseEntity.ok(video);
