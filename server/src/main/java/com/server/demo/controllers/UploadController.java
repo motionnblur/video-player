@@ -12,23 +12,24 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/api")
 public class UploadController {
+
     @Autowired
     private VideoRepository videoRepository;
+
     private final String uploadDir = "uploads/videos/";
 
-    @PostMapping("/upload")
-    public ResponseEntity<VideoEntity> uploadVideo(@RequestParam("file") MultipartFile file) {
-        if (file.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
+    @PostMapping("/upload-chunk")
+    public ResponseEntity<String> uploadChunk(@RequestParam("chunk") MultipartFile chunk,
+                                              @RequestParam("chunkNumber") int chunkNumber,
+                                              @RequestParam("totalChunks") int totalChunks,
+                                              @RequestParam("fileName") String fileName) {
         try {
             // Create upload directory if it doesn't exist
             File directory = new File(uploadDir);
@@ -36,20 +37,44 @@ public class UploadController {
                 directory.mkdirs();
             }
 
-            // Save the video file
-            String fileName = file.getOriginalFilename();
-            Path filePath = Paths.get(uploadDir + fileName);
-            Files.copy(file.getInputStream(), filePath);
+            // Save the chunk to a temporary file
+            File tempFile = new File(uploadDir + fileName + ".part" + chunkNumber);
+            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                fos.write(chunk.getBytes());
+            }
 
-            // Save video metadata to database
-            VideoEntity video = new VideoEntity();
-            video.setTitle(file.getOriginalFilename());
-            video.setFilePath(uploadDir + fileName);
-            videoRepository.save(video);
+            // Check if we have all the chunks
+            boolean allChunksPresent = true;
+            for (int i = 0; i < totalChunks; i++) {
+                File chunkFile = new File(uploadDir + fileName + ".part" + i);
+                if (!chunkFile.exists()) {
+                    allChunksPresent = false;
+                    break;
+                }
+            }
 
-            return ResponseEntity.ok(video);
+            // If all chunks are present, concatenate them
+            if (allChunksPresent) {
+                File videoFile = new File(uploadDir + fileName);
+                try (FileOutputStream fos = new FileOutputStream(videoFile)) {
+                    for (int i = 0; i < totalChunks; i++) {
+                        File chunkFile = new File(uploadDir + fileName + ".part" + i);
+                        fos.write(Files.readAllBytes(chunkFile.toPath()));
+                        chunkFile.delete(); // Delete the chunk after appending
+                    }
+                }
+
+                // Save video metadata to database
+                //VideoEntity video = new VideoEntity();
+                //video.setTitle(fileName);
+                //video.setFilePath(uploadDir + fileName);
+                //videoRepository.save(video);
+            }
+
+            return ResponseEntity.ok("Chunk uploaded successfully");
+
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading chunk");
         }
     }
 }
