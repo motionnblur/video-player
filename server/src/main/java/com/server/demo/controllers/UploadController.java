@@ -37,7 +37,7 @@ public class UploadController {
             }
 
             // Save the video file
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            String fileName = "1.webm";
             Path filePath = Paths.get(uploadDir + fileName);
             Files.copy(file.getInputStream(), filePath);
 
