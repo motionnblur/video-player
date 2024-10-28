@@ -37,7 +37,7 @@ public class UploadController {
             }
 
             // Save the video file
-            String fileName = "warriors.mp4";
+            String fileName = file.getOriginalFilename();
             Path filePath = Paths.get(uploadDir + fileName);
             Files.copy(file.getInputStream(), filePath);
 
