@@ -18,7 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @RestController
-@RequestMapping("/upload")
+@RequestMapping("/api")
 public class UploadController {
     @Autowired
     private VideoRepository videoRepository;
