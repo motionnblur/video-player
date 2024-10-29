@@ -5,6 +5,7 @@ WORKDIR /App
 COPY package*.json ./
 RUN npm i
 RUN npm i axios
+RUN npm i crypto
 
 COPY . .
 
