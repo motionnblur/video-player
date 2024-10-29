@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import crypto from "crypto";
 
+var uploadId: string | null = null;
 export default function Page() {
   const [file, setFile] = useState<File | null>(null);
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -12,7 +13,7 @@ export default function Page() {
     }
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!file) {
       console.error("No file selected");
@@ -23,47 +24,77 @@ export default function Page() {
     const totalChunks = Math.ceil(file.size / chunkSize);
 
     // Calculate SHA-256 checksum of the file
-    // Calculate SHA-256 checksum of the file
-    const fileHash = await new Promise<string>((resolve, reject) => {
-      const hash = crypto.createHash("sha256");
-      const reader = new FileReader();
-      reader.onload = () => {
-        const arrayBuffer = reader.result as ArrayBuffer;
-        const uint8Array = new Uint8Array(arrayBuffer);
-        hash.update(uint8Array);
-        resolve(hash.digest("hex"));
-      };
-      reader.onerror = reject;
-      reader.readAsArrayBuffer(file);
-    });
+    const fileHash = crypto.createHash("sha256");
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const arrayBuffer = reader.result as ArrayBuffer;
+      const uint8Array = new Uint8Array(arrayBuffer);
+      fileHash.update(uint8Array);
+      const hash = fileHash.digest("hex");
 
-    for (let i = 0; i < totalChunks; i++) {
-      const start = i * chunkSize;
-      const end = Math.min(start + chunkSize, file.size);
-      const chunk = file.slice(start, end);
-
-      const formData = new FormData();
-      formData.append("chunk", chunk);
-      formData.append("chunkNumber", `${i}`);
-      formData.append("totalChunks", `${totalChunks}`);
-      formData.append("fileName", file.name);
-      formData.append("fileHash", fileHash); // Send the file hash to the backend
-
+      // Fetch the upload ID
       try {
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_BACKEND_IP}/api/upload-chunk`,
-          formData,
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_IP}/api/upload-id`
+        );
+        uploadId = response.data;
+
+        if (!uploadId) {
+          console.error("No upload ID found");
+          return;
+        }
+
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_BACKEND_IP}/api/hashValue`,
+          null,
           {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
+            params: { fileHash: hash, uploadId },
           }
         );
-        console.log("Chunk uploaded successfully:", response.data);
+
+        const uploadPromises = [];
+
+        for (let i = 0; i < totalChunks; i++) {
+          const start = i * chunkSize;
+          const end = Math.min(start + chunkSize, file.size);
+          const chunk = file.slice(start, end);
+
+          const formData = new FormData();
+          formData.append("chunk", chunk);
+          formData.append("chunkNumber", `${i}`);
+          formData.append("totalChunks", `${totalChunks}`);
+          formData.append("fileName", file.name);
+          formData.append("uploadId", uploadId!);
+
+          // Add the chunk upload promise to the array
+          uploadPromises.push(
+            axios.post(
+              `${process.env.NEXT_PUBLIC_BACKEND_IP}/api/upload-chunk`,
+              formData,
+              {
+                headers: { "Content-Type": "multipart/form-data" },
+              }
+            )
+          );
+        }
+
+        // Wait for all chunk uploads to complete
+        const responses = await Promise.all(uploadPromises);
+        responses.forEach((response) => {
+          console.log(response.data);
+        });
+
+        console.log("All chunks uploaded successfully");
       } catch (error) {
-        console.error("Error uploading chunk:", error);
+        console.error("Error uploading file:", error);
       }
-    }
+    };
+
+    reader.onerror = (error) => {
+      console.error("Error reading file:", error);
+    };
+
+    reader.readAsArrayBuffer(file);
   };
 
   return (
