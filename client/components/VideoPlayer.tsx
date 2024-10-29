@@ -6,7 +6,9 @@ const VideoPlayer = ({ videoId }: { videoId: string }) => {
       <video
         controls
         style={{ width: "100%", height: "auto" }}
-        src={process.env.NEXT_PUBLIC_STREAM_IP + videoId}
+        src={
+          `${process.env.NEXT_PUBLIC_BACKEND_IP}/api/videos/stream/` + videoId
+        }
       />
     </div>
   );

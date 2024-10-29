@@ -34,7 +34,7 @@ export default function Page() {
 
       try {
         const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_UPLOAD_IP}/api/upload-chunk`,
+          `${process.env.NEXT_PUBLIC_BACKEND_IP}/api/upload-chunk`,
           formData,
           {
             headers: {
