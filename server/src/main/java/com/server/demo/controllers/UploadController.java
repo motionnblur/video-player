@@ -25,7 +25,6 @@ public class UploadController {
 
     private final Map<String, String> uploadIdHashValueMap = new HashMap<>();
     private final Map<String, Integer> uploadIdChunkCountMap = new HashMap<>();
-    private final Map<String, Integer> uploadIdTotalChunksMap = new HashMap<>();
 
     @Autowired
     private VideoRepository videoRepository;
@@ -75,7 +74,6 @@ public class UploadController {
             // Update the count of received chunks
             int chunkCount = uploadIdChunkCountMap.getOrDefault(uploadId, 0) + 1;
             uploadIdChunkCountMap.put(uploadId, chunkCount);
-            uploadIdTotalChunksMap.put(uploadId, totalChunks);
 
             // If all chunks are received, concatenate them
             if (chunkCount == totalChunks) {
@@ -105,7 +103,6 @@ public class UploadController {
                 // Clean up maps
                 uploadIdHashValueMap.remove(uploadId);
                 uploadIdChunkCountMap.remove(uploadId);
-                uploadIdTotalChunksMap.remove(uploadId);
 
                 return ResponseEntity.ok("File uploaded successfully");
             }
