@@ -12,9 +12,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import static com.server.demo.Helpers.HashHelper.bytesToHex;
 
 @RestController
 @RequestMapping("/api")
@@ -48,11 +52,28 @@ public class UploadController {
                                               @RequestParam("chunkNumber") int chunkNumber,
                                               @RequestParam("totalChunks") int totalChunks,
                                               @RequestParam("fileName") String fileName,
-                                              @RequestParam("uploadId") String uploadId) {
+                                              @RequestParam("uploadId") String uploadId,
+                                              @RequestParam("chunkHash") String chunkHash) {
         try {
             if (uploadId == null || !uploadIdHashValueMap.containsKey(uploadId)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or missing upload ID");
             }
+            if(chunkNumber < 0 || chunkNumber >= totalChunks){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid chunk number");
+            }
+            if(chunkHash == null){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Chunk hash is missing");
+            }
+
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = md.digest(chunk.getBytes());
+            String currentChunkHash = bytesToHex(hashBytes);
+
+            if (!currentChunkHash.equals(chunkHash)) {
+                // If the hashes do not match, request the client to re-upload the chunk
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Chunk hash mismatch. Please re-upload chunk " + chunkNumber);
+            }
+
             File directory = new File(uploadDir);
             if (!directory.exists()) {
                 directory.mkdirs();
@@ -60,6 +81,7 @@ public class UploadController {
 
             // Save the chunk to a temporary file
             File tempFile = new File(uploadDir + fileName + ".part" + chunkNumber);
+
             try (FileOutputStream fos = new FileOutputStream(tempFile)) {
                 fos.write(chunk.getBytes());
             }
@@ -80,10 +102,10 @@ public class UploadController {
                 }
 
                 // Verify the file hash
-                ByteSource byteSource = com.google.common.io.Files.asByteSource(videoFile);
-                HashCode hc = byteSource.hash(Hashing.sha256());
-                String checksum = hc.toString();
-                if (!checksum.equals(uploadIdHashValueMap.get(uploadId))) {
+                ByteSource byteSource2 = com.google.common.io.Files.asByteSource(videoFile);
+                HashCode hc2 = byteSource2.hash(Hashing.sha256());
+                String checksum2 = hc2.toString();
+                if (!checksum2.equals(uploadIdHashValueMap.get(uploadId))) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File hash mismatch");
                 }
 
@@ -98,6 +120,8 @@ public class UploadController {
 
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
     }
 }
