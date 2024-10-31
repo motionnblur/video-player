@@ -3,9 +3,6 @@ package com.server.demo.controllers;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
-import com.server.demo.entities.VideoEntity;
-import com.server.demo.repositories.VideoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +21,6 @@ import java.util.UUID;
 public class UploadController {
     private final Map<String, String> uploadIdHashValueMap = new HashMap<>();
     private final Map<String, Integer> uploadIdChunkCountMap = new HashMap<>();
-
-    @Autowired
-    private VideoRepository videoRepository;
 
     private final String uploadDir = "uploads/videos/";
 
@@ -93,12 +87,6 @@ public class UploadController {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File hash mismatch");
                 }
 
-                // Save video metadata to database
-                VideoEntity video = new VideoEntity();
-                video.setTitle(fileName);
-                video.setFilePath(uploadDir + fileName);
-                videoRepository.save(video);
-
                 // Clean up maps
                 uploadIdHashValueMap.remove(uploadId);
                 uploadIdChunkCountMap.remove(uploadId);
@@ -109,7 +97,7 @@ public class UploadController {
             return ResponseEntity.ok("Chunk uploaded successfully");
 
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading chunk");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 }
