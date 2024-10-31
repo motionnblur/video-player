@@ -1,5 +1,6 @@
 package com.server.demo.controllers;
 
+import static com.server.demo.Helpers.HashHelper.bytesToHex;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -229,17 +230,5 @@ class UploadControllerTest {
                         .andReturn();
             }
         }
-    }
-
-    public static String bytesToHex(byte[] bytes) {
-        StringBuilder hexString = new StringBuilder();
-        for (byte b : bytes) {
-            String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) {
-                hexString.append('0');
-            }
-            hexString.append(hex);
-        }
-        return hexString.toString();
     }
 }
