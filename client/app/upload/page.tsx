@@ -59,12 +59,19 @@ export default function Page() {
           const end = Math.min(start + chunkSize, file.size);
           const chunk = file.slice(start, end);
 
+          const chunkHash = crypto.createHash("sha256");
+          const chunkArrayBuffer = await chunk.arrayBuffer();
+          const uint8Array = new Uint8Array(chunkArrayBuffer);
+          chunkHash.update(uint8Array);
+          const chunkHashHex = chunkHash.digest("hex");
+
           const formData = new FormData();
           formData.append("chunk", chunk);
           formData.append("chunkNumber", `${i}`);
           formData.append("totalChunks", `${totalChunks}`);
           formData.append("fileName", file.name);
           formData.append("uploadId", uploadId!);
+          formData.append("chunkHash", chunkHashHex);
 
           // Add the chunk upload promise to the array
           uploadPromises.push(
