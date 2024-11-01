@@ -12,13 +12,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.server.demo.helpers.HashHelper.bytesToHex;
+import static com.server.demo.helpers.HashHelper.*;
 
 @RestController
 @RequestMapping("/api")
@@ -65,9 +64,7 @@ public class UploadController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Chunk hash is missing");
             }
 
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = md.digest(chunk.getBytes());
-            String currentChunkHash = bytesToHex(hashBytes);
+            String currentChunkHash = getSha256Hash(chunk.getBytes());
 
             if (!currentChunkHash.equals(chunkHash)) {
                 // If the hashes do not match, request the client to re-upload the chunk
@@ -120,8 +117,6 @@ public class UploadController {
 
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
         }
     }
 }

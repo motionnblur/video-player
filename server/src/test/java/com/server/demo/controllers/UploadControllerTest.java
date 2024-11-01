@@ -1,6 +1,7 @@
 package com.server.demo.controllers;
 
-import static com.server.demo.helpers.HashHelper.bytesToHex;
+import static com.server.demo.helpers.ByteHelper.createRandomByteArray;
+import static com.server.demo.helpers.HashHelper.getSha256Hash;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -46,13 +47,10 @@ class UploadControllerTest {
     void should_Upload_Chunk_On_Correct_Id() throws Exception {
         MvcResult uploadId = this.mockMvc.perform(get("/api/upload-id")).andExpect(status().isOk()).andReturn();
 
-        byte[] mp4FileContent = new byte[1024 * 1024]; // 1MB
-        new Random().nextBytes(mp4FileContent);
+        byte[] mp4FileContent = createRandomByteArray(1024 * 1024);
         MockMultipartFile mockFile = new MockMultipartFile("chunk", "video.mp4", "video/mp4", mp4FileContent);
 
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] hashBytes = md.digest(mockFile.getBytes());
-        String fileHash = bytesToHex(hashBytes);
+        String fileHash = getSha256Hash(mockFile.getBytes());
         assertNotNull(fileHash);
 
         this.mockMvc.perform(post("/api/hashValue").param("fileHash", fileHash).param("uploadId", uploadId.getResponse()
@@ -68,13 +66,10 @@ class UploadControllerTest {
     void should_Not_Upload_Chunk_On_Wrong_Id() throws Exception {
         MvcResult uploadId = this.mockMvc.perform(get("/api/upload-id")).andExpect(status().isOk()).andReturn();
 
-        byte[] mp4FileContent = new byte[1024 * 1024]; // 1MB
-        new Random().nextBytes(mp4FileContent);
+        byte[] mp4FileContent = createRandomByteArray(1024 * 1024);
         MockMultipartFile mockFile = new MockMultipartFile("chunk", "video.mp4", "video/mp4", mp4FileContent);
 
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] hashBytes = md.digest(mockFile.getBytes());
-        String fileHash = bytesToHex(hashBytes);
+        String fileHash = getSha256Hash(mockFile.getBytes());
         assertNotNull(fileHash);
 
         this.mockMvc.perform(post("/api/hashValue").param("fileHash", fileHash).param("wrong-id", uploadId.getResponse()
@@ -90,13 +85,11 @@ class UploadControllerTest {
 
         int chunkSize = 100 * 1024 * 1024; // 10MB
         int totalChunks = 10;
-        byte[] mp4FileContent = new byte[chunkSize];
-        new Random().nextBytes(mp4FileContent);
+        byte[] mp4FileContent = createRandomByteArray(chunkSize);
+
         MockMultipartFile mockFileFull = new MockMultipartFile("chunk", "video.mp4", "video/mp4", mp4FileContent);
 
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] hashBytes = md.digest(mockFileFull.getBytes());
-        String fileHash = bytesToHex(hashBytes);
+        String fileHash = getSha256Hash(mockFileFull.getBytes());
         assertNotNull(fileHash);
 
         this.mockMvc.perform(post("/api/hashValue").param("fileHash", fileHash).param("uploadId", uploadId.getResponse()
@@ -109,8 +102,7 @@ class UploadControllerTest {
             System.arraycopy(mp4FileContent, i * chunkLength, chunk, 0, chunkLength);
             MockMultipartFile mockFile = new MockMultipartFile("chunk", "video.mp4", "video/mp4", chunk);
 
-            byte[] hashBytes2 = md.digest(mockFile.getBytes());
-            String fileHash2 = bytesToHex(hashBytes2);
+            String fileHash2 = getSha256Hash(mockFile.getBytes());
             assertNotNull(fileHash2);
 
             if(i < totalChunks-1){
@@ -133,13 +125,12 @@ class UploadControllerTest {
 
         int chunkSize = 100 * 1024 * 1024; // 10MB
         int totalChunks = 10;
-        byte[] mp4FileContent = new byte[chunkSize];
-        new Random().nextBytes(mp4FileContent);
+
+        byte[] mp4FileContent = createRandomByteArray(chunkSize);
+
         MockMultipartFile mockFileFull = new MockMultipartFile("chunk", "video.mp4", "video/mp4", mp4FileContent);
 
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] hashBytes = md.digest(mockFileFull.getBytes());
-        String fileHash = bytesToHex(hashBytes);
+        String fileHash = getSha256Hash(mockFileFull.getBytes());
         assertNotNull(fileHash);
 
         this.mockMvc.perform(post("/api/hashValue").param("fileHash", fileHash).param("uploadId", uploadId.getResponse()
@@ -153,8 +144,7 @@ class UploadControllerTest {
             System.arraycopy(mp4FileContent, i * chunkLength, chunk, 0, chunkLength);
             MockMultipartFile mockFile = new MockMultipartFile("chunk", "video.mp4", "video/mp4", chunk);
 
-            byte[] hashBytes2 = md.digest(mockFile.getBytes());
-            String fileHash2 = bytesToHex(hashBytes2);
+            String fileHash2 = getSha256Hash(mockFile.getBytes());
             assertNotNull(fileHash2);
 
             if(i < totalChunks-1){
@@ -176,13 +166,11 @@ class UploadControllerTest {
 
         int chunkSize = 100 * 1024 * 1024; // 10MB
         int totalChunks = 10;
-        byte[] mp4FileContent = new byte[chunkSize];
-        new Random().nextBytes(mp4FileContent);
+        byte[] mp4FileContent = createRandomByteArray(chunkSize);
+
         MockMultipartFile mockFileFull = new MockMultipartFile("chunk", "video.mp4", "video/mp4", mp4FileContent);
 
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] hashBytes = md.digest(mockFileFull.getBytes());
-        String fileHash = bytesToHex(hashBytes);
+        String fileHash = getSha256Hash(mockFileFull.getBytes());
         assertNotNull(fileHash);
 
         this.mockMvc.perform(post("/api/hashValue").param("fileHash", fileHash).param("uploadId", uploadId.getResponse()
@@ -195,8 +183,7 @@ class UploadControllerTest {
             System.arraycopy(mp4FileContent, i * chunkLength, chunk, 0, chunkLength);
             MockMultipartFile mockFile = new MockMultipartFile("chunk", "video.mp4", "video/mp4", chunk);
 
-            byte[] hashBytes2 = md.digest(mockFile.getBytes());
-            String fileHash2 = bytesToHex(hashBytes2);
+            String fileHash2 = getSha256Hash(mockFile.getBytes());
             assertNotNull(fileHash2);
 
             if(i < totalChunks-1){
@@ -226,13 +213,11 @@ class UploadControllerTest {
 
         int chunkSize = 100 * 1024 * 1024; // 10MB
         int totalChunks = 10;
-        byte[] mp4FileContent = new byte[chunkSize];
-        new Random().nextBytes(mp4FileContent);
+        byte[] mp4FileContent = createRandomByteArray(chunkSize);
+
         MockMultipartFile mockFileFull = new MockMultipartFile("chunk", "video.mp4", "video/mp4", mp4FileContent);
 
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] hashBytes = md.digest(mockFileFull.getBytes());
-        String fileHash = bytesToHex(hashBytes);
+        String fileHash = getSha256Hash(mockFileFull.getBytes());
         assertNotNull(fileHash);
 
         this.mockMvc.perform(post("/api/hashValue").param("fileHash", fileHash).param("uploadId", uploadId.getResponse()
@@ -263,13 +248,12 @@ class UploadControllerTest {
 
         int chunkSize = 1000 * 1024 * 1024; // 10MB
         int totalChunks = 100;
-        byte[] mp4FileContent = new byte[chunkSize];
-        new Random().nextBytes(mp4FileContent);
+
+        byte[] mp4FileContent = createRandomByteArray(chunkSize);
+
         MockMultipartFile mockFileFull = new MockMultipartFile("chunk", "video.mp4", "video/mp4", mp4FileContent);
 
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] hashBytes = md.digest(mockFileFull.getBytes());
-        String fileHash = bytesToHex(hashBytes);
+        String fileHash = getSha256Hash(mockFileFull.getBytes());
         assertNotNull(fileHash);
 
         this.mockMvc.perform(post("/api/hashValue").param("fileHash", fileHash).param("uploadId", uploadId.getResponse()
@@ -282,8 +266,7 @@ class UploadControllerTest {
             System.arraycopy(mp4FileContent, i * chunkLength, chunk, 0, chunkLength);
             MockMultipartFile mockFile = new MockMultipartFile("chunk", "video.mp4", "video/mp4", chunk);
 
-            byte[] hashBytes2 = md.digest(mockFile.getBytes());
-            String fileHash2 = bytesToHex(hashBytes2);
+            String fileHash2 = getSha256Hash(mockFile.getBytes());
             assertNotNull(fileHash2);
 
             if(i < totalChunks-1){
@@ -306,13 +289,11 @@ class UploadControllerTest {
 
         int chunkSize = 1000 * 1024 * 1024; // 10MB
         int totalChunks = 100;
-        byte[] mp4FileContent = new byte[chunkSize];
-        new Random().nextBytes(mp4FileContent);
+        byte[] mp4FileContent = createRandomByteArray(chunkSize);
+
         MockMultipartFile mockFileFull = new MockMultipartFile("chunk", "video.mp4", "video/mp4", mp4FileContent);
 
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] hashBytes = md.digest(mockFileFull.getBytes());
-        String fileHash = bytesToHex(hashBytes);
+        String fileHash = getSha256Hash(mockFileFull.getBytes());
         assertNotNull(fileHash);
 
         this.mockMvc.perform(post("/api/hashValue").param("fileHash", fileHash).param("uploadId", uploadId.getResponse()
