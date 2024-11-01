@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.server.demo.Helpers.HashHelper.bytesToHex;
+import static com.server.demo.helpers.HashHelper.bytesToHex;
 
 @RestController
 @RequestMapping("/api")

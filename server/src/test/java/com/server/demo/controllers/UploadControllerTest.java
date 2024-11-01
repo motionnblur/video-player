@@ -1,7 +1,6 @@
 package com.server.demo.controllers;
 
-import static com.server.demo.Helpers.HashHelper.bytesToHex;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.server.demo.helpers.HashHelper.bytesToHex;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -18,7 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.security.MessageDigest;
-import java.security.SecureRandom;
 import java.util.Random;
 
 @SpringBootTest

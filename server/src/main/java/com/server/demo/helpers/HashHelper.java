@@ -1,4 +1,4 @@
-package com.server.demo.Helpers;
+package com.server.demo.helpers;
 
 public class HashHelper {
     public static String bytesToHex(byte[] bytes) {
