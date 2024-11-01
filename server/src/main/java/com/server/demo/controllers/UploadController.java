@@ -98,11 +98,9 @@ public class UploadController {
                     }
                 }
 
-                // Verify the file hash
-                ByteSource byteSource2 = com.google.common.io.Files.asByteSource(videoFile);
-                HashCode hc2 = byteSource2.hash(Hashing.sha256());
-                String checksum2 = hc2.toString();
-                if (!checksum2.equals(uploadIdHashValueMap.get(uploadId))) {
+                String newFullFileHash = getSha256Hash(Files.readAllBytes(videoFile.toPath()));
+
+                if (!newFullFileHash.equals(uploadIdHashValueMap.get(uploadId))) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File hash mismatch");
                 }
 
