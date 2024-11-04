@@ -17,46 +17,26 @@ import static com.server.demo.memory.UploadControllerMemory.uploadIdChunkCountMa
 
 @Service
 public class UploadChunkService {
-    public void securityCheckForParameters(MultipartFile chunk, int chunkNumber, int totalChunks, String fileName, String uploadId, String chunkHash) throws Exception {
-        if (uploadId == null) {
-            throw new Exception("missing upload ID");
-        }
+    public void tryToSecurityCheckForParameters(MultipartFile chunk, int chunkNumber, int totalChunks, String uploadId, String chunkHash) throws Exception {
         if(!uploadIdHashValueMap.containsKey(uploadId)){
             throw new Exception("Invalid upload ID");
         }
         if(chunkNumber < 0 || chunkNumber >= totalChunks){
             throw new Exception("Invalid chunk number");
         }
-        if(chunkHash == null){
-            throw new Exception("Missing chunk hash");
-        }
-        if(chunk == null){
-            throw new Exception("Missing chunk");
-        }
-        if(fileName == null){
-            throw new Exception("Missing file name");
-        }
 
         String currentChunkHash = getSha256Hash(chunk.getBytes());
-
         if (!currentChunkHash.equals(chunkHash))
             throw new Exception("Wrong hash");
     }
     private String getSha256HashOfThatChunk(MultipartFile chunk) throws IOException {
         return HashHelper.getSha256Hash(chunk.getBytes());
     }
-
-    public void createUploadDirectoryIfNotExists() {
-        File directory = new File(uploadDir);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-    }
-    public ResponseEntity<String> uploadTheFile(String fileName,
-                                               MultipartFile chunk,
-                                               int chunkNumber,
-                                               int totalChunks,
-                                               String uploadId) throws Exception {
+    public ResponseEntity<String> tryToUploadTheFileThenReturnResponse(MultipartFile chunk,
+                                                                  int chunkNumber,
+                                                                  int totalChunks,
+                                                                  String fileName,
+                                                                  String uploadId) throws Exception {
         // Save the chunk to a temporary file
         File tempFile = new File(uploadDir + fileName + ".part" + chunkNumber);
 

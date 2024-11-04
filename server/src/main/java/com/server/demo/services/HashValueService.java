@@ -9,11 +9,13 @@ import static com.server.demo.memory.UploadControllerMemory.uploadIdHashValueMap
 
 @Service
 public class HashValueService {
-    public void mergeThatHashWithUploadId(String hashValue, String uploadId) throws Exception {
-        if (uploadIdHashValueMap.containsKey(uploadId) && !uploadIdHashValueMap.isEmpty()) {
-            uploadIdHashValueMap.put(uploadId, hashValue);
-        }else{
-            throw new Exception("Invalid upload ID");
+    public void mergeThatHashWithUploadId(String hashValue, String uploadId){
+        uploadIdHashValueMap.put(uploadId, hashValue);
+    }
+
+    public void tryToCheckIfHashWeJustGotInParamAlreadyExists(String uploadId, String fileHash) throws Exception {
+        if (!uploadIdHashValueMap.containsKey(uploadId)) {
+            throw new Exception("Invalid hash value");
         }
     }
 }
