@@ -1,14 +1,11 @@
 package com.server.demo.services;
 
-import com.server.demo.helpers.HashHelper;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Files;
 
 import static com.server.demo.helpers.HashHelper.getSha256Hash;
@@ -28,9 +25,6 @@ public class UploadChunkService {
         String currentChunkHash = getSha256Hash(chunk.getBytes());
         if (!currentChunkHash.equals(chunkHash))
             throw new Exception("Wrong hash");
-    }
-    private String getSha256HashOfThatChunk(MultipartFile chunk) throws IOException {
-        return HashHelper.getSha256Hash(chunk.getBytes());
     }
     public ResponseEntity<String> tryToUploadTheFileThenReturnResponse(MultipartFile chunk,
                                                                   int chunkNumber,

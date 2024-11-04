@@ -15,6 +15,5 @@ public class UploadIdService {
     public void putThatUploadIdIntoHashMaps(String uploadId) {
         uploadIdHashValueMap.put(uploadId, null);
         uploadIdChunkCountMap.put(uploadId, 0);
-
     }
 }
