@@ -1,23 +1,26 @@
 package com.server.demo;
 
+import com.server.demo.services.FileService;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.io.File;
-
-import static com.server.demo.memory.UploadControllerMemory.uploadDir;
-
 @SpringBootApplication
 public class VideoServerApplication {
+	private final FileService fileService;
 
-	public static void main(String[] args) {
-		File directory = new File(uploadDir);
-		if (!directory.exists()) {
-			if (!directory.mkdirs()) {
-				System.err.println("Failed to create directory: " + uploadDir);
-			}
-		}
-		SpringApplication.run(VideoServerApplication.class, args);
+	// Constructor injection of FileService
+	@Autowired
+	public VideoServerApplication(FileService fileService) {
+		this.fileService = fileService;
 	}
 
+	public static void main(String[] args) {
+		SpringApplication.run(VideoServerApplication.class, args);
+	}
+	@PostConstruct
+	public void init() {
+		fileService.createDirectoryIfNotExist();
+	}
 }

@@ -1,5 +1,6 @@
 package com.server.demo.services;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +15,8 @@ import static com.server.demo.memory.UploadControllerMemory.uploadIdChunkCountMa
 
 @Service
 public class UploadChunkService {
+    @Autowired
+    private FileService fileService;
     public void tryToSecurityCheckForParameters(MultipartFile chunk, int chunkNumber, int totalChunks, String uploadId, String chunkHash) throws Exception {
         if(!uploadIdHashValueMap.containsKey(uploadId)){
             throw new Exception("Invalid upload ID");
@@ -32,7 +35,7 @@ public class UploadChunkService {
                                                                   String fileName,
                                                                   String uploadId) throws Exception {
         // Save the chunk to a temporary file
-        File tempFile = new File(uploadDir + fileName + ".part" + chunkNumber);
+        File tempFile = new File(fileService.getUploadDir() + fileName + ".part" + chunkNumber);
 
         try (FileOutputStream fos = new FileOutputStream(tempFile)) {
             fos.write(chunk.getBytes());
@@ -44,10 +47,10 @@ public class UploadChunkService {
 
         // If all chunks are received, concatenate them
         if (chunkCount == totalChunks) {
-            File videoFile = new File(uploadDir + fileName);
+            File videoFile = new File(fileService.getUploadDir() + fileName);
             try (FileOutputStream fos = new FileOutputStream(videoFile)) {
                 for (int i = 0; i < totalChunks; i++) {
-                    File chunkFile = new File(uploadDir + fileName + ".part" + i);
+                    File chunkFile = new File(fileService.getUploadDir() + fileName + ".part" + i);
                     fos.write(Files.readAllBytes(chunkFile.toPath()));
                     chunkFile.delete(); // Delete the chunk after appending
                 }
