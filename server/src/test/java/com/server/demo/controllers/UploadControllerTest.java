@@ -28,18 +28,6 @@ class UploadControllerTest {
     }
 
     @Test
-    void should_Get_HashValue_On_Correct_id() throws Exception {
-        MvcResult r = this.mockMvc.perform(get("/api/upload-id")).andExpect(status().isOk()).andReturn();
-        this.mockMvc.perform(post("/api/hashValue").param("fileHash", "123").param("uploadId", r.getResponse().getContentAsString())).andExpect(status().isOk());
-    }
-
-    @Test
-    void should_Not_Get_HashValue_On_Wrong_Id() throws Exception {
-        MvcResult r = this.mockMvc.perform(get("/api/upload-id")).andExpect(status().isOk()).andReturn();
-        this.mockMvc.perform(post("/api/hashValue").param("fileHash", "123").param("uploadId", "wrong-id")).andExpect(status().isBadRequest());
-    }
-
-    @Test
     void should_Upload_Chunk_On_Correct_Id() throws Exception {
         MvcResult uploadId = this.mockMvc.perform(get("/api/upload-id")).andExpect(status().isOk()).andReturn();
 
@@ -49,9 +37,6 @@ class UploadControllerTest {
         String fileHash = getSha256Hash(mockFile.getBytes());
         assertNotNull(fileHash);
 
-        this.mockMvc.perform(post("/api/hashValue").param("fileHash", fileHash).param("uploadId", uploadId.getResponse()
-                        .getContentAsString()).param("chunkHash", fileHash))
-                .andExpect(status().isOk());
         this.mockMvc.perform(multipart("/api/upload-chunk").file(mockFile).param("chunkNumber", "0").param("totalChunks", "1")
                         .param("fileName", "test.txt").param("uploadId", uploadId.getResponse().getContentAsString())
                         .param("chunkHash", fileHash))
@@ -68,9 +53,6 @@ class UploadControllerTest {
         String fileHash = getSha256Hash(mockFile.getBytes());
         assertNotNull(fileHash);
 
-        this.mockMvc.perform(post("/api/hashValue").param("fileHash", fileHash).param("wrong-id", uploadId.getResponse()
-                        .getContentAsString()))
-                .andExpect(status().isBadRequest());
         this.mockMvc.perform(multipart("/api/upload-chunk").file(mockFile).param("chunkNumber", "0").param("totalChunks", "1")
                 .param("fileName", "test.txt").param("wrong-id", uploadId.getResponse().getContentAsString())).andExpect(status().isBadRequest());
     }
@@ -87,9 +69,6 @@ class UploadControllerTest {
 
         String fileHash = getSha256Hash(mockFileFull.getBytes());
         assertNotNull(fileHash);
-
-        this.mockMvc.perform(post("/api/hashValue").param("fileHash", fileHash).param("uploadId",uploadId.getResponse().getContentAsString()))
-                .andExpect(status().isOk());
 
         int chunkLength = chunkSize / totalChunks;
         byte[] chunk = new byte[chunkLength];
@@ -126,9 +105,6 @@ class UploadControllerTest {
 
         String fileHash = getSha256Hash(mockFileFull.getBytes());
         assertNotNull(fileHash);
-
-        this.mockMvc.perform(post("/api/hashValue").param("fileHash", fileHash).param("uploadId",uploadId.getResponse().getContentAsString()))
-                .andExpect(status().isOk());
 
         int chunkLength = chunkSize / totalChunks;
         byte[] chunk = new byte[chunkLength];

@@ -26,19 +26,6 @@ public class UploadController {
         return ResponseEntity.ok(uploadId);
     }
 
-    @PostMapping("/hashValue")
-    public ResponseEntity<String> getHashValue(@RequestParam("fileHash") String fileHash,
-                                               @RequestParam("uploadId") String uploadId) {
-        try {
-            hashValueService.tryToCheckIfHashWeJustGotInParamAlreadyExists(uploadId, fileHash);
-            hashValueService.mergeThatHashWithUploadId(fileHash, uploadId);
-
-            return ResponseEntity.ok("Hash value updated successfully");
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
     @PostMapping("/upload-chunk")
     public ResponseEntity<String> uploadChunk(@RequestParam("chunk") MultipartFile chunk,
                                               @RequestParam("chunkNumber") int chunkNumber,
